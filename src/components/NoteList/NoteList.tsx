@@ -1,17 +1,28 @@
 import css from "./NoteList.module.css";
+import type { Note } from "../../types/note";
 
-export default function NoteList() {
+interface NoteListProps {
+  notes: Note[];
+  onDelete: (id: string) => void;
+}
+
+const NoteList = ({ notes, onDelete }: NoteListProps) => {
   return (
     <ul className={css.list}>
-      {/* елементи списку нотаток */}
-      <li className={css.listItem}>
-        <h2 className={css.title}>Note title</h2>
-        <p className={css.content}>Note content</p>
-        <div className={css.footer}>
-          <span className={css.tag}>Note tag</span>
-          <button className={css.button}>Delete</button>
-        </div>
-      </li>
+      {notes.map((item) => (
+        <li key={item.id} className={css.listItem}>
+          <h2 className={css.title}>{item.title}</h2>
+          <p className={css.content}>{item.content}</p>
+          <div className={css.footer}>
+            <span className={css.tag}>{item.tag}</span>
+            <button className={css.button} onClick={() => onDelete(item.id)}>
+              Delete
+            </button>
+          </div>
+        </li>
+      ))}
     </ul>
   );
-}
+};
+
+export default NoteList;
