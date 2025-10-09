@@ -1,63 +1,75 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import css from "./App.module.css";
 import NoteList from "../NoteList/NoteList";
-import Pagination from "../Pagination/Pagination";
 import SearchBox from "../SearchBox/SearchBox";
 import Modal from "../Modal/Modal";
-import NoteForm from "../NoteForm/NoteForm";
-import { useNotes, addNote, removeNote } from "../../services/noteService";
+import { useNotes } from "../../services/noteService";
+import toast, { Toaster } from "react-hot-toast";
 import { useDebounce } from "use-debounce";
+import Loader from "../Loader/Loader";
+import ErrorMessage from "../ErrorMessage/ErrorMessage";
+import NoteForm from "../NoteForm/NoteForm";
+import Pagination from "../Pagination/Pagination";
 
-const App = () => {
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const [debouncedSearch] = useDebounce(search, 500);
+export default function App() {
+  const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [rawSearch, setRawSearch] = useState("");
+  const [debouncedSearch] = useDebounce(rawSearch, 300);
 
-  const { data, isLoading, isError } = useNotes(page, debouncedSearch);
+  const closeModal = () => setIsModalOpen(false);
+  const openModal = () => setIsModalOpen(true);
 
-  const handleAdd = async (values: {
-    title: string;
-    content?: string;
-    tag: string;
-  }) => {
-    await addNote(values);
-    setIsModalOpen(false);
-  };
+  const { data, isSuccess, isLoading, isError } = useNotes(
+    currentPage,
+    debouncedSearch
+  );
 
-  const handleDelete = async (id: string) => {
-    await removeNote(id);
-  };
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch]);
+
+  useEffect(() => {
+    if (isSuccess && data?.notes && data.notes.length === 0) {
+      toast.error("No notes found.");
+    }
+  }, [isSuccess, data]);
 
   return (
     <div className={css.app}>
       <header className={css.toolbar}>
-        <SearchBox value={search} onChange={(e) => setSearch(e.target.value)} />
-        {data && data.totalPages > 1 && (
+        <SearchBox
+          value={rawSearch}
+          onChange={(e) => setRawSearch(e.target.value)}
+        />
+        {data?.totalPages && data.totalPages > 1 && (
           <Pagination
             totalPages={data.totalPages}
-            onPageChange={(p) => setPage(p)}
+            currentPage={currentPage}
+            onPageChange={setCurrentPage}
           />
         )}
-        <button className={css.button} onClick={() => setIsModalOpen(true)}>
+        <button onClick={openModal} className={css.button}>
           Create note +
         </button>
       </header>
 
-      {!isLoading && !isError && data && data.notes.length > 0 && (
-        <NoteList notes={data.notes} onDelete={handleDelete} />
-      )}
+      {isLoading && <Loader />}
+      {isError && <ErrorMessage />}
+      {data?.notes && data.notes.length > 0 && <NoteList notes={data.notes} />}
 
       {isModalOpen && (
-        <Modal onClose={() => setIsModalOpen(false)}>
-          <NoteForm
-            onSubmit={handleAdd}
-            onCancel={() => setIsModalOpen(false)}
-          />
+        <Modal onClose={closeModal}>
+          <NoteForm onClose={closeModal} />
         </Modal>
       )}
+
+      <Toaster
+        toastOptions={{
+          duration: 2000,
+          position: "top-right",
+        }}
+      />
     </div>
   );
-};
-
-export default App;
+}
