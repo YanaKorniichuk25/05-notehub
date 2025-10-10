@@ -1,6 +1,5 @@
 import { useQuery, type QueryFunctionContext } from "@tanstack/react-query";
 import axios from "axios";
-import toast from "react-hot-toast";
 import type { Note } from "../types/note";
 
 export type NotesResponse = {
@@ -41,7 +40,6 @@ export const createNote = async (data: {
       "Content-Type": "application/json",
     },
   });
-  toast.success("New note saved!");
   return response.data;
 };
 
@@ -50,7 +48,6 @@ export const removeNote = async (id: string): Promise<Note> => {
   const response = await axios.delete<Note>(`notes/${id}`, {
     headers: { Authorization: `Bearer ${token}`, accept: "application/json" },
   });
-  toast.success("Note removed");
   return response.data;
 };
 

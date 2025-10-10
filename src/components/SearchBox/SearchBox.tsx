@@ -1,3 +1,4 @@
+import React from "react";
 import css from "./SearchBox.module.css";
 
 interface SearchBoxProps {
@@ -5,7 +6,7 @@ interface SearchBoxProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-const SearchBox = ({ value, onChange }: SearchBoxProps) => {
+const SearchBox: React.FC<SearchBoxProps> = ({ value, onChange }) => {
   return (
     <input
       className={css.input}
