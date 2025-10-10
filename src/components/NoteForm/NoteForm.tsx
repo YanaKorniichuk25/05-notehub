@@ -34,32 +34,18 @@ export default function NoteForm({ onClose }: NoteFormProps) {
   });
 
   const validationSchema = Yup.object().shape({
-    title: Yup.string()
-      .min(3, "Title must be at least 3 characters")
-      .max(50, "Title is too long")
-      .required("Title is required"),
-    content: Yup.string().max(500, "Content is too long"),
+    title: Yup.string().min(3).max(50).required(),
+    content: Yup.string().max(500),
     tag: Yup.mixed<NoteFormValues["tag"]>()
       .oneOf(["Todo", "Work", "Personal", "Meeting", "Shopping"])
-      .required("Tag is required"),
+      .required(),
   });
 
   const handleSubmit = (
     values: NoteFormValues,
     actions: FormikHelpers<NoteFormValues>
   ) => {
-    mutation.mutate(values, {
-      onSuccess: () => {
-        actions.resetForm();
-        actions.setSubmitting(false);
-      },
-      onError: () => {
-        actions.setSubmitting(false);
-      },
-      onSettled: () => {
-        actions.setSubmitting(false);
-      },
-    });
+    mutation.mutate(values, { onSettled: () => actions.setSubmitting(false) });
   };
 
   return (
@@ -79,7 +65,6 @@ export default function NoteForm({ onClose }: NoteFormProps) {
           />
           <ErrorMessage component="span" name="title" className={css.error} />
         </div>
-
         <div className={css.formGroup}>
           <label htmlFor={`${fieldId}-content`}>Content</label>
           <Field
@@ -91,7 +76,6 @@ export default function NoteForm({ onClose }: NoteFormProps) {
           />
           <ErrorMessage component="span" name="content" className={css.error} />
         </div>
-
         <div className={css.formGroup}>
           <label htmlFor={`${fieldId}-tag`}>Tag</label>
           <Field
@@ -108,7 +92,6 @@ export default function NoteForm({ onClose }: NoteFormProps) {
           </Field>
           <ErrorMessage component="span" name="tag" className={css.error} />
         </div>
-
         <div className={css.actions}>
           <button type="button" className={css.cancelButton} onClick={onClose}>
             Cancel

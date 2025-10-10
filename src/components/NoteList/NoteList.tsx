@@ -18,9 +18,7 @@ const NoteList = ({ notes }: NoteListProps) => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       setDeletingId(null);
     },
-    onError: () => {
-      setDeletingId(null);
-    },
+    onError: () => setDeletingId(null),
   });
 
   const handleDelete = (id: string) => {
