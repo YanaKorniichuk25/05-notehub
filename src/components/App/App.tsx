@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "use-debounce";
 import css from "./App.module.css";
@@ -21,10 +21,14 @@ export default function App() {
   const [debouncedSearch] = useDebounce(rawSearch, 500);
   const [currentPage, setCurrentPage] = useState(1);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [rawSearch]);
+
   const { data } = useQuery<NotesResponse>({
     queryKey: ["notes", currentPage, debouncedSearch],
     queryFn: () => fetchNotes(currentPage, debouncedSearch),
-    staleTime: 1000 * 60, // 1 хвилина, щоб кеш не оновлювався миттєво
+    staleTime: 1000 * 60,
     placeholderData: { notes: [], totalPages: 1 },
   });
 
